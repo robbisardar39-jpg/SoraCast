@@ -158,6 +158,18 @@ object MainActivityScreen : Screen {
             }
 
             is GithubUpdateDialogState.UpdateFound -> {
+                val installedVersion = BuildConfig.VERSION_NAME.removePrefix("v").substringBefore("-")
+                val releaseVersion = state.file.tagName.removePrefix("v").substringBefore("-")
+                val hasValidShas = !state.oldSha.isNullOrBlank() && !state.newSha.isNullOrBlank()
+
+                if (
+                    (hasValidShas && state.oldSha == state.newSha) ||
+                    (!hasValidShas && installedVersion == releaseVersion)
+                ) {
+                    onAction(Dismiss)
+                    return
+                }
+
                 cancelable = true
                 title = stringResource(
                     R.string.new_update_format,
