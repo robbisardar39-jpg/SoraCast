@@ -20,3 +20,9 @@ SoraCast is an Android media app with a clean dark interface, quick category swi
 1. Go to the [Releases](https://github.com/robbisardar39-jpg/SoraCast-/releases) page and download `SoraCast-release-signed.apk`.
 2. Allow installing apps from your browser or file manager if Android asks.
 3. Install and open SoraCast.
+
+## Screenshots
+
+| Home (All) | Anime | Live |
+| --- | --- | --- |
+| ![Home Screen](screenshots/Screenshot_2026-11-27-12-41-41-764_app.soracast.jpg) | ![Anime Tab](screenshots/Screenshot_2026-11-27-12-42-32-200_app.soracast.jpg) | ![Live Tab](screenshots/Screenshot_2026-11-27-12-42-35-307_app.soracast.jpg) |
