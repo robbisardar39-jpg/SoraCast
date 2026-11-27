@@ -2,11 +2,6 @@
 
 SoraCast is an Android media app with a clean dark interface, quick category switching across movies, anime, and live broadcasts, a custom app identity, and built-in GitHub release updates.
 
-## Screenshots
-
-| Home & Movies | Anime | Live Sports |
-| :---: | :---: | :---: |
-| ![SoraCast Home and Movies](screenshots/home-movies.png) | ![SoraCast Anime](screenshots/anime.png) | ![SoraCast Live Sports](screenshots/live-sports.png) |
 
 ## What Changed
 
