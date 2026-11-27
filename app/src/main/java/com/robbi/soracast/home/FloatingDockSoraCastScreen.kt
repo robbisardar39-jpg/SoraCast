@@ -102,12 +102,9 @@ fun FloatingDockSoraCastScreen(
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 56.dp, bottom = 88.dp),
+                    contentPadding = PaddingValues(top = 0.dp, bottom = 88.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item(key = "top_bar_clearance") {
-                        Spacer(modifier = Modifier.height(48.dp))
-                    }
                     if (heroItem != null) {
                         item(key = "hero:" + heroItem.url) {
                             FeaturedHeroBanner(
@@ -169,7 +166,7 @@ fun FloatingDockSoraCastScreen(
                 .align(Alignment.TopCenter)
                 .zIndex(3f)
                 .statusBarsPadding()
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 2.dp, start = 12.dp, end = 12.dp)
                 .wrapContentSize()
         )
     }
@@ -198,7 +195,7 @@ private fun FeaturedHeroBanner(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.45f),
+                            Color.Black.copy(alpha = 0.62f),
                             Color.Transparent,
                             MaterialTheme.colorScheme.background
                         )
@@ -257,23 +254,22 @@ private fun TopCategoryBar(
         shadowElevation = 12.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             options.forEach { option ->
                 val isSelected = selectedFilter.equals(option, ignoreCase = true)
-                FilterChip(
-                    selected = isSelected,
+                Surface(
                     onClick = { onSelectFilter(option) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.Transparent,
-                        labelColor = Color.White.copy(alpha = 0.82f),
-                        selectedContainerColor = Color.White.copy(alpha = 0.22f),
-                        selectedLabelColor = Color.White
-                    ),
-                    label = { Text(option, maxLines = 1) }
-                )
+                    shape = CircleShape,
+                    color = if (isSelected) Color.White.copy(alpha = 0.22f) else Color.Transparent,
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 12.dp)) {
+                        Text(text = option, maxLines = 1, style = MaterialTheme.typography.labelMedium, color = if (isSelected) Color.White else Color.White.copy(alpha = 0.82f))
+                    }
+                }
             }
         }
     }
@@ -356,7 +352,7 @@ private fun ShelfRow(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(shelf.items, key = { it.url }) { item ->
+            items(shelf.items, key = { item -> item.url.ifBlank { "${item.apiName}:${item.id ?: item.name}" } }) { item ->
                 Card(
                     onClick = { onItemClick(item) },
                     modifier = Modifier.width(124.dp)

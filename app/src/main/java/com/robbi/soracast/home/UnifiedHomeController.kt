@@ -9,6 +9,8 @@ import com.lagradost.cloudstream3.amap
 import com.lagradost.cloudstream3.mvvm.Resource
 import com.lagradost.cloudstream3.plugins.PluginManager
 import com.lagradost.cloudstream3.plugins.RepositoryManager
+import com.lagradost.cloudstream3.ui.home.HomeViewModel
+import com.lagradost.cloudstream3.utils.DataStoreHelper
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
@@ -36,6 +38,9 @@ class UnifiedHomeController(
 
     private val _selectedCategory = MutableStateFlow(SoraCastConfig.categoryFilter)
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
+
+    private val _continueWatchingShelf = MutableStateFlow<AggregatedShelf?>(null)
+    val continueWatchingShelf: StateFlow<AggregatedShelf?> = _continueWatchingShelf.asStateFlow()
 
     private val isBootstrapping = AtomicBoolean(false)
 
@@ -109,6 +114,7 @@ class UnifiedHomeController(
                     }
                 }
 
+                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = true)
                 val snapshot = aggregator.loadUnifiedSnapshot(page = 1)
                 _providerCounts.value = snapshot.totalLoadedApis to snapshot.mainPageProviders
                 _allShelves.value = snapshot.shelves
@@ -147,6 +153,7 @@ class UnifiedHomeController(
         _loadState.value = Resource.Loading()
         ioSafe {
             try {
+                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = true)
                 val snapshot = aggregator.loadUnifiedSnapshot(page = page)
                 _providerCounts.value = snapshot.totalLoadedApis to snapshot.mainPageProviders
                 _allShelves.value = snapshot.shelves
@@ -173,9 +180,52 @@ class UnifiedHomeController(
         refreshShelves()
     }
 
+    private suspend fun loadContinueWatchingShelf(allowFallback: Boolean = true): AggregatedShelf? {
+        val rawItems = runCatching { HomeViewModel.getResumeWatching().orEmpty() }
+            .getOrDefault(emptyList())
+            .filter { it.name.isNotBlank() }
+        if (rawItems.isEmpty()) {
+            return if (allowFallback) _continueWatchingShelf.value else null
+        }
+        val providers = rawItems.mapNotNull { it.apiName.takeIf { name -> name.isNotBlank() } }.distinct()
+        return AggregatedShelf(
+            title = "Continue Watching",
+            bucket = ShelfBucket.ALL,
+            providerNames = providers,
+            items = rawItems
+        )
+    }
+
+    private fun composeVisibleShelves(base: List<AggregatedShelf>): List<AggregatedShelf> {
+        val cw = _continueWatchingShelf.value
+        val category = _selectedCategory.value.uppercase()
+        val filteredCw = cw?.let { shelf ->
+            when (category) {
+                "MOVIES" -> shelf.copy(
+                    items = shelf.items.filter { item ->
+                        val res = item as? DataStoreHelper.ResumeWatchingResult
+                        res?.type == com.lagradost.cloudstream3.TvType.Movie ||
+                            res?.type == com.lagradost.cloudstream3.TvType.TvSeries
+                    }
+                ).takeIf { it.items.isNotEmpty() }
+                "ANIME" -> shelf.copy(
+                    items = shelf.items.filter { item ->
+                        val res = item as? DataStoreHelper.ResumeWatchingResult
+                        res?.type == com.lagradost.cloudstream3.TvType.Anime ||
+                            res?.type == com.lagradost.cloudstream3.TvType.AnimeMovie ||
+                            res?.type == com.lagradost.cloudstream3.TvType.OVA
+                    }
+                ).takeIf { it.items.isNotEmpty() }
+                "LIVE" -> null
+                else -> shelf
+            }
+        }
+        return if (filteredCw != null) listOf(filteredCw) + base else base
+    }
+
     private fun applyFilter() {
         val current = _allShelves.value
-        _visibleShelves.value = when (_selectedCategory.value.uppercase()) {
+        val filtered = when (_selectedCategory.value.uppercase()) {
             "MOVIES" -> current.filter { it.bucket == ShelfBucket.MOVIES }
             "ANIME" -> current.filter { it.bucket == ShelfBucket.ANIME }
             "LIVE" -> current.filter { shelf ->
@@ -185,6 +235,7 @@ class UnifiedHomeController(
             }
             else -> current
         }
+        _visibleShelves.value = composeVisibleShelves(filtered)
     }
 
     fun release() {
