@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,6 +12,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -63,6 +67,8 @@ import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.lagradost.cloudstream3.SearchResponse
 import com.lagradost.cloudstream3.mvvm.Resource
+import com.robbi.soracast.home.HomeScreenSkeleton
+import com.robbi.soracast.home.ShelfSkeletonRow
 
 private val FrostedGlassFill = Color(0xB8181B24)
 private val FrostedGlassBorder = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f))
@@ -73,14 +79,26 @@ fun FloatingDockSoraCastScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val shelves by controller.visibleShelves.collectAsState()
     val loadState by controller.loadState.collectAsState()
     val providerCounts by controller.providerCounts.collectAsState()
     val statusMessage by controller.statusMessage.collectAsState()
     val selectedFilter by controller.selectedCategory.collectAsState()
+    val isLoading = loadState is Resource.Loading
 
     LaunchedEffect(Unit) {
         controller.bootstrapAndLoad(context)
+    }
+
+    DisposableEffect(lifecycleOwner, controller) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                controller.refreshContinueWatching(allowFallback = false)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Box(
@@ -96,6 +114,7 @@ fun FloatingDockSoraCastScreen(
                 shelves.firstOrNull()
             }
             val heroItem = preferredHeroShelf?.items?.firstOrNull()
+            val hasRemoteShelves = shelves.any { it.title != "Continue Watching" }
             Surface(
                 color = MaterialTheme.colorScheme.background,
                 modifier = Modifier.fillMaxSize()
@@ -127,7 +146,23 @@ fun FloatingDockSoraCastScreen(
                             )
                         }
                     }
+
+                    if (isLoading && !hasRemoteShelves) {
+                        item(key = "remote_shelves_skeleton") {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ShelfSkeletonRow()
+                                ShelfSkeletonRow()
+                            }
+                        }
+                    }
                 }
+            }
+        } else if (isLoading) {
+            Surface(
+                color = MaterialTheme.colorScheme.background,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                HomeScreenSkeleton()
             }
         } else if (loadState is Resource.Failure) {
             val failure = loadState as Resource.Failure

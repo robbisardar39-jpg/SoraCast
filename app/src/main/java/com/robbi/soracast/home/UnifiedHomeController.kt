@@ -114,13 +114,13 @@ class UnifiedHomeController(
                     }
                 }
 
-                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = true)
                 val snapshot = aggregator.loadUnifiedSnapshot(page = 1)
+                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = false)
                 _providerCounts.value = snapshot.totalLoadedApis to snapshot.mainPageProviders
                 _allShelves.value = snapshot.shelves
-                applyFilter()
                 _statusMessage.value = "${snapshot.mainPageProviders} active"
                 _loadState.value = Resource.Success(snapshot.shelves)
+                applyFilter()
             } catch (t: Throwable) {
                 _statusMessage.value = "Plugin sync error"
                 _loadState.value = Resource.Failure(
@@ -130,6 +130,13 @@ class UnifiedHomeController(
             } finally {
                 isBootstrapping.set(false)
             }
+        }
+    }
+
+    fun refreshContinueWatching(allowFallback: Boolean = false) {
+        ioSafe {
+            _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = allowFallback)
+            applyFilter()
         }
     }
 
@@ -153,13 +160,13 @@ class UnifiedHomeController(
         _loadState.value = Resource.Loading()
         ioSafe {
             try {
-                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = true)
                 val snapshot = aggregator.loadUnifiedSnapshot(page = page)
+                _continueWatchingShelf.value = loadContinueWatchingShelf(allowFallback = false)
                 _providerCounts.value = snapshot.totalLoadedApis to snapshot.mainPageProviders
                 _allShelves.value = snapshot.shelves
-                applyFilter()
                 _statusMessage.value = "${snapshot.mainPageProviders} active"
                 _loadState.value = Resource.Success(snapshot.shelves)
+                applyFilter()
             } catch (t: Throwable) {
                 _loadState.value = Resource.Failure(
                     isNetworkError = t is IOException,
@@ -180,7 +187,7 @@ class UnifiedHomeController(
         refreshShelves()
     }
 
-    private suspend fun loadContinueWatchingShelf(allowFallback: Boolean = true): AggregatedShelf? {
+    private suspend fun loadContinueWatchingShelf(allowFallback: Boolean = false): AggregatedShelf? {
         val rawItems = runCatching { HomeViewModel.getResumeWatching().orEmpty() }
             .getOrDefault(emptyList())
             .filter { it.name.isNotBlank() }
