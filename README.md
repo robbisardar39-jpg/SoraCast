@@ -1,16 +1,22 @@
 # SoraCast
 
-SoraCast is a customized Android streaming client built on the CloudStream architecture with updated branding, refined navigation spacing, inflation stability fixes, and direct GitHub release updates.
+SoraCast is an Android media app with a clean dark interface, quick category switching across movies, anime, and live broadcasts, a custom app identity, and built-in GitHub release updates.
 
-## Key Changes & Features
+## Screenshots
 
-- **Custom SoraCast Branding:** Updated launcher icons (`mipmap-*`), adaptive icon layers, legacy splash screen (`splash_background.xml`), and Android 12+ splash screen (`values-v31/styles.xml`) using `ic_soracast_logo` on a `#242855` background.
-- **Proportional Top Category Bar Spacing:** Standardized top padding (`56.dp`) and hero clearance (`48.dp`) in `FloatingDockSoraCastScreen.kt` across all sections (`All`, `Movies`, `Anime`, `Live`) so content aligns cleanly below the floating category bar without overlap or excess gap.
-- **Download Button Inflation Fix:** Resolved `InflateException` / `NumberFormatException` crashes when opening item detail screens (`fragment_result` / `fragment_result_swipe`) by replacing unresolved theme attribute lookups in `download_button_view.xml` with explicit values.
-- **GitHub Self-Updater Integration:** Configured `InAppUpdater.kt`, `GithubReleases.kt`, and `SettingsGeneralScreen.kt` to check `robbisardar39-jpg/SoraCast-` for new releases.
+| Home & Movies | Anime | Live Sports |
+| :---: | :---: | :---: |
+| ![SoraCast Home and Movies](screenshots/home-movies.png) | ![SoraCast Anime](screenshots/anime.png) | ![SoraCast Live Sports](screenshots/live-sports.png) |
+
+## What Changed
+
+- **Custom App Identity:** Updated the app icon and splash screen with SoraCast branding and a deep navy backdrop (`#242855`).
+- **Cleaner Layout & Spacing:** Refined the top category bar (`All`, `Movies`, `Anime`, `Live`) and spacing across sections so featured posters, titles, and action buttons sit cleanly without crowding or overlap.
+- **Smoother Details & Downloads:** Fixed a crash that occurred when opening content detail pages so you can view details and start downloads reliably.
+- **Easy Updates:** Connected the app updater to the `SoraCast-` GitHub repository so new releases can be checked and downloaded directly.
 
 ## Installation
 
-1. Download `SoraCast-release-signed.apk` from the [Releases](https://github.com/robbisardar39-jpg/SoraCast-/releases) page.
-2. Enable **Install from unknown sources** if prompted by Android.
-3. Install and launch SoraCast.
+1. Go to the [Releases](https://github.com/robbisardar39-jpg/SoraCast-/releases) page and download `SoraCast-release-signed.apk`.
+2. Allow installing apps from your browser or file manager if Android asks.
+3. Install and open SoraCast.

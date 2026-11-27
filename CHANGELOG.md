@@ -1,16 +1,17 @@
 # Changelog
 
-All notable changes to SoraCast are documented in this file.
+All notable updates to SoraCast are listed here.
 
 ## [1.0.0] - 2026-11-27
 
 ### Added
-- Custom SoraCast app logo (`ic_soracast_logo`) across all launcher densities (`mdpi` through `xxxhdpi`), adaptive icon XMLs, and Android 12+ (`values-v31`) splash screen resources with `#242855` background.
-- Project documentation (`README.md` and `CHANGELOG.md`) and `.gitignore` rules for local APK/signature build artifacts.
+- Custom SoraCast app icon and splash screen with `#242855` background.
+- Screenshots in `README.md` showcasing the home/movies view, anime section, and live sports view.
+- `README.md` and `CHANGELOG.md` documentation plus ignore rules for local APK build files.
 
-### Changed
-- Adjusted top category bar clearance in `FloatingDockSoraCastScreen.kt` (`56.dp` top content padding and `48.dp` spacer) for proportional spacing across `All`, `Movies`, `Anime`, and `Live`.
-- Pointed in-app update checks in `InAppUpdater.kt`, `GithubReleases.kt`, and `SettingsGeneralScreen.kt` to `robbisardar39-jpg/SoraCast-`.
+### Improved
+- Balanced spacing around the top category bar (`All`, `Movies`, `Anime`, `Live`) and featured content across sections.
+- Updated the in-app updater to pull releases from `robbisardar39-jpg/SoraCast-`.
 
 ### Fixed
-- Fixed `InflateException` (`NumberFormatException` on `?attr/download_icon_scale` and tint resolution) in `download_button_view.xml` that prevented item details pages from opening.
+- Fixed the crash on content detail screens so the download button and page load properly.
